@@ -27,3 +27,13 @@ $ conda activate mini-rag
 ```bash
 $ pip install -r requirements.txt
 ```
+
+### Setup the Environment Variables
+```bash
+$ cp .env.example .env
+```
+
+### Run the FastAPI Server
+```bash
+$ uvicorn main:app --reload --host 0.0.0.0 --port 5000
+```
