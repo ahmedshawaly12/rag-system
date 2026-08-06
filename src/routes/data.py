@@ -53,5 +53,3 @@ async def upload(project_id: str, file: UploadFile,
         
     )
 
-
-
