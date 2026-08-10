@@ -8,7 +8,7 @@ from models import ResponseSignal
 from .schemes.data import ProcessRequest
 import logging
 
-
+ProjectModel
 logger = logging.getLogger('uvicorn.error')
 data_router = APIRouter(prefix='/api/v1/data', tags=['api_v1','data'])
 
@@ -18,7 +18,7 @@ async def upload(request:Request , project_id: str, file: UploadFile,
                  app_settings:Settings=Depends(get_settings)):
 
 
-    project_model = ProjectModel(db_client=request.app.db_client)
+    project_model = await ProjectModel.create_instance(db_client=request.app.db_client)
 
     project = await project_model.get_or_create_project(project_id=project_id)
 
@@ -65,11 +65,11 @@ async def upload(request:Request , project_id: str, file: UploadFile,
 async def process_endpoint(request: Request, project_id: str, process_request:ProcessRequest):
 
 
-    prject_model = ProjectModel(db_client=request.app.db_client)
+    prject_model = await ProjectModel.create_instance(db_client=request.app.db_client)
 
     project = await prject_model.get_or_create_project(project_id=project_id)
 
-    data_chunck_model = DataChucnkModel(db_client=request.app.db_client)
+    data_chunck_model = await DataChucnkModel.create_instance(db_client=request.app.db_client)
 
     process_controller = ProcessController(project_id)
 
@@ -96,7 +96,7 @@ async def process_endpoint(request: Request, project_id: str, process_request:Pr
                       chunck_project_id=project.id) for i, chunck in enumerate(file_chuncks)]
 
 
-    data_chunck_model = DataChucnkModel(db_client=request.app.db_client)
+    data_chunck_model = await DataChucnkModel.create_instance(db_client=request.app.db_client)
 
     if do_reset == 1:
         _ = await data_chunck_model.remove_chunck_by_project_id(project_id=project.id)

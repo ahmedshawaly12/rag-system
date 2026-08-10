@@ -8,9 +8,32 @@ class ProjectModel(BaseDataModel):
 
         self.collection = self.db_client[DataBaseEnum.COLLECTION_PROJECT_NAME.value]
 
+    @classmethod
+    async def create_instance(cls, db_client: object):
+        instance = cls(db_client)
+        await instance.init_collection()
+        return instance
+
+
+    
+    async def init_collection(self):
+        all_collections = await self.db_client.list_collection_names()
+
+        if DataBaseEnum.COLLECTION_PROJECT_NAME.value not in all_collections:
+            self.collection = self.db_client[DataBaseEnum.COLLECTION_PROJECT_NAME.value]
+
+            indexes = ProjectSchema.get_indexes()
+
+            for index in indexes:
+                await self.collection.create_index(index['key'], name=index['name'], unique=index['unique'])
+
+
 
     async def create_project(self, project: ProjectSchema):
+        print("inside create method: ",project)
+        print("inside created with dump: ",project.model_dump(by_alias=True, exclude_unset=True))
         result = await self.collection.insert_one(project.model_dump(by_alias=True, exclude_unset=True))
+        print('result after insert: ', result)
         project.id = result.inserted_id
         return project
 
@@ -19,7 +42,9 @@ class ProjectModel(BaseDataModel):
 
         if result is None:
             project = ProjectSchema(project_id=project_id)
+            print('not exist project: ', project)
             project = await self.create_project(project=project)
+            print('inserted successfully')
             return project
 
         return ProjectSchema(**result)
