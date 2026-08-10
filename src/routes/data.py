@@ -2,7 +2,7 @@ from fastapi import APIRouter, UploadFile, Depends, status, Request
 from fastapi.responses import JSONResponse
 from helpers import Settings, get_settings
 from controlers import DataController, ProjectController, ProcessController
-from models import ProjectModel
+from models import ProjectModel, DataChucnkModel, DataChunckSchema
 import aiofiles
 from models import ResponseSignal
 from .schemes.data import ProcessRequest
@@ -62,7 +62,14 @@ async def upload(request:Request , project_id: str, file: UploadFile,
 
 
 @data_router.post('/process/{project_id}')
-async def process_endpoint(project_id: str, process_request:ProcessRequest):
+async def process_endpoint(request: Request, project_id: str, process_request:ProcessRequest):
+
+
+    prject_model = ProjectModel(db_client=request.app.db_client)
+
+    project = await prject_model.get_or_create_project(project_id=project_id)
+
+    data_chunck_model = DataChucnkModel(db_client=request.app.db_client)
 
     process_controller = ProcessController(project_id)
 
@@ -83,7 +90,24 @@ async def process_endpoint(project_id: str, process_request:ProcessRequest):
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST,
                             content=ResponseSignal.PROCESSING_FAILED.value)
 
-    return file_chuncks
+    file_chuncks_records = [DataChunckSchema(chunck_text= chunck.page_content ,
+                      chunck_metadata=chunck.metadata, 
+                      chunck_order=i+1, 
+                      chunck_project_id=project.id) for i, chunck in enumerate(file_chuncks)]
+
+
+    data_chunck_model = DataChucnkModel(db_client=request.app.db_client)
+
+    if do_reset == 1:
+        _ = await data_chunck_model.remove_chunck_by_project_id(project_id=project.id)
+
+    num_records = await data_chunck_model.insert_many_chuncks(chuncks=file_chuncks_records)
+
+
+    return JSONResponse(content = {
+        'signal': ResponseSignal.PROCESSING_SUCCESS.value,
+        'num_records': num_records
+        })
 
 
 
