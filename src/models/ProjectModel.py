@@ -30,10 +30,8 @@ class ProjectModel(BaseDataModel):
 
 
     async def create_project(self, project: ProjectSchema):
-        print("inside create method: ",project)
-        print("inside created with dump: ",project.model_dump(by_alias=True, exclude_unset=True))
+
         result = await self.collection.insert_one(project.model_dump(by_alias=True, exclude_unset=True))
-        print('result after insert: ', result)
         project.id = result.inserted_id
         return project
 
@@ -42,9 +40,9 @@ class ProjectModel(BaseDataModel):
 
         if result is None:
             project = ProjectSchema(project_id=project_id)
-            print('not exist project: ', project)
+
             project = await self.create_project(project=project)
-            print('inserted successfully')
+
             return project
 
         return ProjectSchema(**result)
