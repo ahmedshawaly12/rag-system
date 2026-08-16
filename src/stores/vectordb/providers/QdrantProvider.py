@@ -2,10 +2,10 @@ from ..VectorDBInterface import VectorDBInterface
 from ..VectorDBEnum import DistanceMethodEnum
 
 from models.db_schemes import RetrievedDocument
-
 from qdrant_client import models, QdrantClient
 from typing import List
 import logging
+
 
 class QdrantProvider(VectorDBInterface):
     def __init__(self, db_path: str, distance_method: str):

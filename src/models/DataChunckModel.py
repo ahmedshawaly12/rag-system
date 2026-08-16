@@ -59,3 +59,16 @@ class DataChucnkModel(BaseDataModel):
         res = await self.collection.delete_many({'chunck_project_id': project_id})
 
         return res.deleted_count
+
+
+    async def get_chuncks_by_project_id(self, project_id: ObjectId , page_num:int=1, page_size: int=50):
+
+        
+        results = await self.collection.find(
+            {'chunck_project_id': project_id}
+            ).skip((page_num-1) * page_size).limit(page_size).to_list(length=None)
+
+        return [DataChunckSchema(**doc) for doc in results]
+
+
+
