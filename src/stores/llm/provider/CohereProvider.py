@@ -1,5 +1,5 @@
 from ..LLMInterface import LLMInterface
-from LLMEnum import CohereEnum, DocumentTypeEnum
+from ..LLMEnum import CohereEnum, DocumentTypeEnum
 
 import cohere
 import logging
@@ -88,7 +88,7 @@ class CohereProvider(LLMInterface):
 
 
         response = self.client.embed(
-            texts=[text],
+            texts=text if isinstance(text, list) else [text],
             model = self.embedding_model_id,
             input_type=input_type,
             embedding_types=['float'],
@@ -101,7 +101,7 @@ class CohereProvider(LLMInterface):
             self.logger.error("Error while creating Embedding using Cohere")
             return None
 
-        return response.embeddings.float[0]
+        return response.embeddings.float
 
         
 
