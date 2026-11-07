@@ -33,7 +33,19 @@ $ pip install -r requirements.txt
 $ cp .env.example .env
 ```
 
-### Run the FastAPI Server
+## Run Docker Compose Services
+
+```bash
+$ cd docker
+$ cp .env.example .env
+```
+- update your `.env` with your credential
+
+```bash
+$ docker compose up -d
+```
+
+## Run the FastAPI Server
 ```bash
 $ uvicorn main:app --reload --host 0.0.0.0 --port 5000
 ```
